@@ -1,0 +1,197 @@
+# **Travaux Dirigés – Séance 2 : Fonctionnement de Bas Niveau**
+
+## **Exercice 1 : Cycles d’horloge et optimisation**
+
+Une machine possède **trois classes d’instructions** s’exécutant respectivement en **2, 5 et 10 cycles d’horloge**.
+
+Deux compilateurs traduisent une même commande de haut niveau en un nombre différent d’instructions :
+
+- **Premier compilateur** :
+    - 4 instructions de **classe I** (2 cycles chacune).
+    - 3 instructions de **classe II** (5 cycles chacune).
+    - 2 instructions de **classe III** (10 cycles chacune).
+- **Deuxième compilateur** :
+    - 2 instructions de **classe I**.
+    - 2 instructions de **classe II**.
+    - 4 instructions de **classe III**.
+
+### **Questions :**
+
+**a) Quel code contient le moins d’instructions ?**
+
+> Nombre d'instructions du premier compilateur :
+4 + 3 + 2 = 9 instructions
+> Nombre d'instructions du deuxième compilateur :
+2 + 2 + 4 = 8 instructions
+> Donc le deuxième compilateur contient le moins d'instructions.
+
+**b) Quel code s’exécute le plus rapidement ?**
+
+> Nombre de cycles du premier compilateur :
+4 * 2 + 3 * 5 + 2 * 10 = 43 cycles
+> Nombre de cycles du deuxième compilateur :
+2 * 2 + 2 * 5 + 4 * 10 = 54 cycles
+> Donc le premier compilateur s'exécute le plus rapidement car 43 < 54
+
+---
+
+En moyenne, la répartition des instructions est la suivante :
+
+- **70%** pour les instructions de **classe I**.
+- **10%** pour les instructions de **classe II**.
+- **20%** pour les instructions de **classe III**.
+
+Une nouvelle version de la machine **réduit le nombre de cycles des instructions de classe II de 5 à 3**, soit une **amélioration de 40%**.
+
+- **classe I** (2 cycles chacune).
+- **classe II** (3 cycles chacune).
+- **classe III** (10 cycles chacune).
+
+### **Question :**
+
+**c) Quel est le gain de temps effectif sur l’exécution moyenne des instructions ?**
+
+- On calcule le temps effectif moyen avant l'amélioration :
+    (70 * 2 + 10 * 5 + 20 * 10) / 100 = 3.9 cycles en moyenne
+    
+- On calcule le temps effectif moyen après l'amélioration :
+    (70 * 2 + 10 * 3 + 20 * 10) / 100 = 3.7 cycles en moyenne
+
+$$
+\frac{T_{\text{avant}} - T_{\text{après}}}{T_{\text{avant}}} \times 100
+$$
+
+Nous avons donc un gain de temps effectif de 5.13%.
+
+---
+
+## **Exercice 2 : Adressage et codage en CISC**
+
+Un processeur **CISC** possède :
+
+- **16 registres de 16 bits** chacun.
+- Les instructions sont encodées sous forme de **mots-machine**.
+- L’**addition** est représentée par le code **0b10**, complété par des **bits d’adressage**.
+
+Les trois **premiers modes d’adressage** sont :
+
+- **Mode immédiat** : Addition entre un registre et une constante.
+- **Mode registre** : Addition entre trois registres (le premier est la destination).
+- **Mode indirect** : Addition entre un registre et une valeur en mémoire, où un registre est utilisé comme **pointeur** (indirection).
+
+### **Questions :**
+
+### **2.1 Adressage des registres**
+
+**a) Combien de bits faut-il pour désigner un registre ?**
+
+- On doit trouver un n tel que \(2^n \geq 16\).
+Soit \(2^4\), il faut donc 4 bits pour désigner un registre de 16 bits.
+
+$$
+2^n \geq 16
+$$
+
+**b) Écrire l’instruction qui met dans le registre 3 la somme des registres 6 et 13.**
+
+- **Registre destination** : `R3`
+- **Registre source 1** : `R6`
+- **Registre source 2** : `R13`
+
+En binaire sur 4 bits : 
+
+- R3 : 0011
+- R6 : 0110
+- R13 : 1101
+
+L'addition est représentée par le code d'opération : `0b10`
+
+L’instruction en binaire est : 
+
+10 [**Registre destination**] [**Registre source 1**] [**Registre source 2**]
+
+Soit l’instruction en binaire : 10 0011 0110 1101
+
+**c) En adressage immédiat, combien de bits peuvent être réservés à la constante ?**
+
+La taille totale de l'instruction est de **16 bits**.
+
+- **2 bits** sont utilisés pour le code opération (`0b10`).
+- **4 bits** sont utilisés pour le registre concerné.
+
+16 − 2 - 4 = 10 bits restants
+
+On pourra consacrer 10 bits à la constante.
+
+**d) Écrire l’instruction qui ajoute `1` au registre `6`.**
+
+Le registre est codé sur : `4 bits`, soit R6 → `0110` :
+
+`+1` sur 10 bits s’écrit : 0000000001
+
+L’instruction qui ajoute `1` à `R6` en mode immédiat en binaire : `10 0110 0000000001`
+
+**e) Écrire l’instruction qui retranche `1` au registre `6`.**
+
+**Écrire `1` en binaire sur 10 bits** :
+0000000001
+
+**Appliquer le complément à deux** 
+
+**Inverser les bits** :
+1111111110
+
+**Ajouter `1`** :
+1111111111
+
+Donc, **-1 en complément à deux sur 10 bits est** :
+
+1111111111
+
+Maintenant, on assemble les **trois parties** :
+
+10 0110 1111111111
+
+**f) Écrire l’instruction qui ajoute au registre `6` un nombre en mémoire pointé par le registre `11`.**
+
+- **Addition** : `10` (**2 bits**)
+- **Registre Destination = `R6`** → `0110` (**4 bits**)
+- **Registre Source 1 = `R6`** → `0110` (**4 bits**)
+- **Registre 11 Pointeur  = `R11`** → `1011` (**4 bits**)
+
+Soit : 10 0110 0110 1011
+
+**g) Un **4ᵉ mode d’adressage** existe, similaire au **mode immédiat**, mais ne concernant que les **registres 12 à 15**, qui sont alors **renumérotés de 0 à 3**. Combien de bits peut-on réserver à la constante dans ce mode ?**
+
+L’instruction a toujours **16 bits au total** : 
+
+- **4 bits** sont utilisés pour le registre concerné.
+- 2 bits pour l’adressage.
+
+16 − 4 - 2 = 10 bits
+
+**h) Une instruction **beqz** (Branchement si égal à zéro) est définie par le code `0b0111` (bits d’adressage inclus).**
+
+- Elle prend **deux opérandes** : un **registre** et une **constante**.
+- Son fonctionnement : **Si le registre est nul, la constante est ajoutée au compteur de programme** pour modifier le flux d’exécution.
+
+**Écrire l’instruction qui vérifie si `R13` est nul et, si c’est le cas, remonte de 50 octets dans le programme.**
+
+Dans ce mode d’adressage, **les registres 12 à 15 sont renumérotés de 0 à 3**.
+
+- `R12` → `00`
+- `R13` → `01`
+- `R14` → `10`
+- `R15` → `11`
+
+**Convertir `50` en binaire sur 10 bits :** 000000110010
+
+**Appliquer le complément à deux pour avoir -50 :** 
+
+Inverser les bits : 111111001101
+
+Ajouter : 111111001110
+
+Soit -50 en binaire : 111111001110
+
+Soit l’instruction en binaire :  0111 01 111111001110
